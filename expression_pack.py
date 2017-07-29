@@ -44,14 +44,19 @@ def parsePage(html,i,j):
     :return: None
     '''
     try:
+        counts = 1
         soup = BeautifulSoup(html, 'html.parser')
-        urls = soup.find_all('img')
-        for k,url in enumerate(urls):                                                  # k-th gif
-            url = url.get('data-original')
-            if url != None:
-                request.urlretrieve(url, 'result'+str(i)+'/'+str(j)+'_'+str(k)+'.gif')
-                print('save the {}_{}-th img'.format(j,k))
-                time.sleep(np.random.randint(10,15))
+        gifs = soup.find_all('ul',{'class':"tupian3_ul cl"})
+        for gif in gifs[0]:
+            if gif != '\n':
+                gif = str(gif)
+                start_index = gif.index('data-original="') + len('data-original="')
+                end_index = gif.index('" src')
+                gif = gif[start_index:end_index]
+                request.urlretrieve(gif, 'result'+str(i)+'/'+str(j)+'_'+str(counts))
+                print('save the {}-th folder, {}_{}-th img'.format(i,j,counts))
+                time.sleep(np.random.randint(10,12))
+                counts += 1
     except:
         return None
 
@@ -68,10 +73,12 @@ if __name__ == '__main__':
             url = 'http://www.wxcha.com/biaoqing/dongtai/update_' + str(i) + '.html'    # 对应的url链接
             html = getHTMLText(url)                                                     # 得到HTML页面
             urls = getUrls(html)
+            urls = list(set(urls))
             for j,url in enumerate(urls):
+                j += 1
                 html = getHTMLText(url)                                                 # 得到HTML页面
-                parsePage(html,i,j)                                                      # 对HTML页面进行解析, 并将gif保存至本地
-                time.sleep(10,20)
+                parsePage(html,i,j)                                                     # 对HTML页面进行解析, 并将gif保存至本地
+                time.sleep(np.random.randint(10,15))
         except:
             continue
 
